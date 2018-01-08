@@ -16,7 +16,7 @@ from rest_framework.views import APIView
 from rest_framework import status
 from .helpers import generate_jwt_token
 from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-
+from .permissions import IsAuthorOrReadOnly
 
 # Create your views here.
 
@@ -28,6 +28,7 @@ class BlogList(generics.ListCreateAPIView):
 
 	def post(self,request,format=None,**kwargs):
 
+
 		data = request.data
 
 		data['author'] = self.request.user.id
@@ -37,11 +38,11 @@ class BlogList(generics.ListCreateAPIView):
 		if serializer.is_valid():
 
 			serializer.save()
-			return Response({"blog":serializer.validated_data})				
+			return Response({"blog":serializer.data})				
 
 class BlogDetail(generics.RetrieveUpdateDestroyAPIView):
 
-	permission_classes = (permissions.IsAuthenticated,)
+	permission_classes = (permissions.IsAuthenticated,IsAuthorOrReadOnly)
 	queryset = Blog.objects.all()
 	serializer_class = BlogSerializer
 
